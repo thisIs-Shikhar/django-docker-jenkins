@@ -1,4 +1,4 @@
-FROM registry.newroztech.com/django-base:latest
+FROM registry.newroztech.com/django-base
 
 ENV TERM=xterm-256color
 

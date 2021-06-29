@@ -16,7 +16,7 @@ node {
         sh "make buildtag master \$(git tag --points-at HEAD)"
         withEnv(["DOCKER_USER=${DOCKER_USER}",
                  "DOCKER_PASSWORD=${DOCKER_PASSWORD}",
-                 "DOCKER_EMAIL=${DOCKER_EMAIL}"]) {    
+                 "DOCKER_EMAIL=${DOCKER_EMAIL}"]) {
             sh "make login"
         }
         sh "make publish"

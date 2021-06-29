@@ -1,4 +1,4 @@
 # Ignore the virtual environment
 env
 # Ignore test reports
-reports
+reports/

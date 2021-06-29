@@ -1,0 +1,53 @@
+version: '3.9'
+
+volumes:
+  build:
+    driver: local
+  cache:
+    external: true
+
+services:
+  test:
+    build: 
+      context: ../../
+      dockerfile: docker/dev/Dockerfile  
+    volumes:
+      - cache:/cache
+      - build:/build
+    links:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: todobackend.settings.test
+    env_file:
+      - ./.env
+  builder:
+    build: 
+      context: ../../
+      dockerfile: docker/dev/Dockerfile
+    volumes:
+      - build:/build
+    entrypoint: "entrypoint.sh"
+    command: ["pip", "wheel", "--no-index", "-f /build", "."]
+
+  agent:
+    image: jmenga/ansible
+    links:
+      - db
+    environment:
+      PROBE_HOST: "db"
+      PROBE_PORT: "3306"
+    command: ["probe.yml"]
+
+  db:
+    image: postgres
+    restart: always
+    hostname: db
+    container_name: app_db
+    expose:
+      - 5432
+    volumes:
+        - db_volume:/var/lib/postgresql/data
+    environment: 
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: password

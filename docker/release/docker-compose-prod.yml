@@ -1,0 +1,68 @@
+version: '3.9'
+
+volumes:
+  db_volume:
+  webroot:
+
+services:
+  app:
+    build: 
+      context: ../../
+      dockerfile: docker/release/Dockerfile  
+    volumes:
+      - webroot:/var/www/todobackend/static/
+      - webroot:/var/www/todobackend/media/
+    links:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: todobackend.settings.release
+    command: gunicorn todobackend.wsgi:application -b 0.0.0.0:8000 --workers 4
+    expose:
+      - 8000
+    env_file:
+      - .env
+    depends_on:
+      - agent
+
+  nginx:
+    image: nginx
+    volumes:
+      - ./todobackend.conf:/etc/nginx/conf.d/todobackend.conf
+      - webroot:/var/www/todobackend/static/
+      - webroot:/var/www/todobackend/media/
+    ports:
+      - 8000:8000
+    depends_on:
+      - app
+
+  agent:
+    image: registry.newroztech.com/ansible
+    volumes:
+      - ../../docker-ansible/ansible/probe.yml:/ansible/site.yml
+    links:
+      - db
+    environment:
+      PROBE_HOST: "db"
+      PROBE_PORT: "5432"
+
+  cache:
+    build:
+      context: ../../
+      dockerfile: docker/dev/Dockerfile
+    volumes:
+      - /tmp/cache:/cache
+      - ../../build:/build
+    entrypoint: "true"
+
+  db:
+    image: postgres
+    hostname: db
+    container_name: prod_db
+    expose:
+      - 5432
+    volumes:
+        - db_volume:/var/lib/postgresql/data
+    environment: 
+        POSTGRES_DB: postgres
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: password

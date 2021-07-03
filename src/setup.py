@@ -13,8 +13,7 @@ setup (
                           "Django==3.2.4",
                           "django-cors-headers==3.7.0",
                           "djangorestframework==3.12.4",
-                          "psycopg2-binary==2.9.1",
-                          "gunicorn>=20.1.0"],
+                          "psycopg2-binary==2.9.1",],
   
   extras_require       = {
                             "test": [

@@ -45,15 +45,6 @@ services:
       PROBE_HOST: "db"
       PROBE_PORT: "5432"
 
-  cache:
-    build:
-      context: ../../
-      dockerfile: docker/dev/Dockerfile
-    volumes:
-      - /tmp/cache:/cache
-      - ../../build:/build
-    entrypoint: "true"
-
   db:
     image: postgres
     hostname: db

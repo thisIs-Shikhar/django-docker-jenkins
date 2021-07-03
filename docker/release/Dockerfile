@@ -1,5 +1,4 @@
-FROM jmenga/todobackend-base:latest
-MAINTAINER Justin Menga <justin.menga@gmail.com>
+FROM registry.newroztech.com/django-base
 
 # Copy application artifacts
 COPY target /wheelhouse

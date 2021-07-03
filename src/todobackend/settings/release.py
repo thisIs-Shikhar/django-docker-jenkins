@@ -13,12 +13,12 @@ ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS', '*')]
 # Database settings
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': os.environ.get('MYSQL_DATABASE','todobackend'),
-        'USER': os.environ.get('MYSQL_USER','todo'),
-        'PASSWORD': os.environ.get('MYSQL_PASSWORD','password'),
-        'HOST': os.environ.get('MYSQL_HOST','localhost'),
-        'PORT': os.environ.get('MYSQL_PORT','3306'),
+        'ENGINE': os.environ.get('DB_ENGINE'),
+        'NAME': os.environ.get('DB_NAME'),
+        'USER': os.environ.get('DB_USER'),
+        'PASSWORD': os.environ.get('DB_PASS'),
+        'HOST': os.environ.get('DB_HOST'),
+        'PORT': os.environ.get('DB_PORT'),
     }
 }
 

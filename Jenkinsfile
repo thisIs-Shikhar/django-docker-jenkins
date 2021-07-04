@@ -33,7 +33,7 @@ node {
     }
     
     finally {
-        stage ('collect test reports') {
+        stage ('Collect Test Reports') {
             junit '**/reports/*.xml'
         }
         stage ("cleanup and logout"){
@@ -41,5 +41,5 @@ node {
             sh 'make logout'
         }
     }
-    
+   
 }

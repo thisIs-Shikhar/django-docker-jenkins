@@ -3,14 +3,11 @@ node {
     checkout scm
     try {
 
-        stage ("notify") {
-            sh "curl -X POST -H 'Content-Type: application/json' -d '{\"chat_id\": \"-1001556850823\", \"text\": \"Started Building App\", \"disable_notification\": true}' https://api.telegram.org/bot1750146504:AAE5lT-GQNVtEF48xQwH3IvecZa8WrytYY8/sendMessage"
-        }
         stage ('Login to Newroz Private Repository') {
             withEnv(["DOCKER_USER=${DOCKER_USER}",
                      "DOCKER_PASSWORD=${DOCKER_PASSWORD}"]) {
                 sh "make login "
-                
+                sh "curl -X POST -H 'Content-Type: application/json' -d '{\"chat_id\": \"-1001556850823\", \"text\": \"Started Building App logged in to registry.newroztech.com\", \"disable_notification\": true}' https://api.telegram.org/bot1750146504:AAE5lT-GQNVtEF48xQwH3IvecZa8WrytYY8/sendMessage"                
             }
         }
         
@@ -37,11 +34,12 @@ node {
     
     finally {
         stage ('collect test reports') {
-            stage "cleanup"
+            junit '**/reports/*.xml'
+        }
+        stage ("cleanup"){
             sh 'make clean'
             sh 'make logout'
         }
-        sh "curl -X POST -H 'Content-Type: application/json' -d '{\"chat_id\": \"-1001556850823\", \"text\": \"Deployed App\", \"disable_notification\": true}' https://api.telegram.org/bot1750146504:AAE5lT-GQNVtEF48xQwH3IvecZa8WrytYY8/sendMessage"
     }
     
 }

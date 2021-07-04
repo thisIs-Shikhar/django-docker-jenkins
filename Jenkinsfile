@@ -15,8 +15,7 @@ node {
         sh "make tag latest \$(git rev-parse --short HEAD) \$(git tag --points-at HEAD)"
         sh "make buildtag master \$(git tag --points-at HEAD)"
         withEnv(["DOCKER_USER=${DOCKER_USER}",
-                 "DOCKER_PASSWORD=${DOCKER_PASSWORD}",
-                 "DOCKER_EMAIL=${DOCKER_EMAIL}"]) {
+                 "DOCKER_PASSWORD=${DOCKER_PASSWORD}",]) {
             sh "make login"
         }
         sh "make publish"
@@ -27,7 +26,7 @@ node {
         build job: DEPLOY_JOB, parameters: [[
             $class: 'StringParameterValue',
             name: 'IMAGE_TAG',
-            value: 'jmenga/todobackend:' + imageTag
+            value: 'registry.newroztech.com:' + imageTag
         ]]
     }
     finally {

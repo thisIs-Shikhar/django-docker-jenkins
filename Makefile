@@ -31,11 +31,7 @@ CHECK := @bash -c '\
   then exit $(INSPECT); fi' VALUE
 
 # Use these settings to specify a custom Docker registry
-DOCKER_REGISTRY ?= docker.io
-
-# WARNING: Set DOCKER_REGISTRY_AUTH to empty for Docker Hub
-# Set DOCKER_REGISTRY_AUTH to auth endpoint for private Docker registry
-DOCKER_REGISTRY_AUTH ?=
+DOCKER_REGISTRY ?= registry.newroztech.com
 
 .PHONY: test build release clean tag buildtag login logout publish
 
@@ -64,11 +60,8 @@ build:
 	${INFO} "Build complete"
 
 release:
-	${INFO} "Pulling latest images..."
-	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) pull test
 	${INFO} "Building images..."
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build app
-	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build webroot
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) build --pull nginx
 	${INFO} "Ensuring database is ready..."
 	@ docker-compose -p $(REL_PROJECT) -f $(REL_COMPOSE_FILE) run --rm agent
@@ -95,7 +88,7 @@ clean:
 
 tag: 
 	${INFO} "Tagging release image with tags $(TAG_ARGS)..."
-	@ $(foreach tag,$(TAG_ARGS), docker tag -f $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME):$(tag);)
+	@ $(foreach tag,$(TAG_ARGS), docker tag $(IMAGE_ID) $(DOCKER_REGISTRY)/$(ORG_NAME)/$(REPO_NAME):$(tag);)
 	${INFO} "Tagging complete"
 
 buildtag:
@@ -105,12 +98,12 @@ buildtag:
 
 login:
 	${INFO} "Logging in to Docker registry $$DOCKER_REGISTRY..."
-	@ docker login -u $$DOCKER_USER -p $$DOCKER_PASSWORD -e $$DOCKER_EMAIL $(DOCKER_REGISTRY_AUTH)
+	@ docker login -u $$DOCKER_USER -p $$DOCKER_PASSWORD $(DOCKER_REGISTRY)
 	${INFO} "Logged in to Docker registry $$DOCKER_REGISTRY"
 
 logout:
 	${INFO} "Logging out of Docker registry $$DOCKER_REGISTRY..."
-	@ docker logout
+	@ docker logout $(DOCKER_REGISTRY)
 	${INFO} "Logged out of Docker registry $$DOCKER_REGISTRY"	
 
 publish:

@@ -5,6 +5,20 @@ volumes:
   webroot:
 
 services:
+  test:
+    build: 
+      context: ../../
+      dockerfile: docker/dev/Dockerfile
+    links:
+      - db
+    environment:
+      DJANGO_SETTINGS_MODULE: todobackend.settings.test
+    env_file:
+      - .env
+    depends_on:
+      - agent
+      - app
+
   app:
     build: 
       context: ../../

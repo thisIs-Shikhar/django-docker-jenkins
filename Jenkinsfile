@@ -1,40 +1,47 @@
 node {
+    // git credentialsId: 'private-key', url: 'git@github.com:by-sabbir/django-docker-jenkins.git'
     checkout scm
-
     try {
-        stage 'Run unit/integration tests'
-        sh 'make test'
-        
-        stage 'Build application artefacts'
-        sh 'make build'
 
-        stage 'Create release environment and run acceptance tests'
-        sh 'make release'
-
-        stage 'Tag and publish release image'
-        sh "make tag latest \$(git rev-parse --short HEAD) \$(git tag --points-at HEAD)"
-        sh "make buildtag master \$(git tag --points-at HEAD)"
-        withEnv(["DOCKER_USER=${DOCKER_USER}",
-                 "DOCKER_PASSWORD=${DOCKER_PASSWORD}",]) {
-            sh "make login"
+        stage ("notify") {
+            sh "curl -X POST -H 'Content-Type: application/json' -d '{\"chat_id\": \"-1001556850823\", \"text\": \"Started Building App\", \"disable_notification\": true}' https://api.telegram.org/bot1750146504:AAE5lT-GQNVtEF48xQwH3IvecZa8WrytYY8/sendMessage"
         }
-        sh "make publish"
-
-        stage 'Deploy release'
-        sh "printf \$(git rev-parse --short HEAD) > tag.tmp"
-        def imageTag = readFile 'tag.tmp'
-        build job: DEPLOY_JOB, parameters: [[
-            $class: 'StringParameterValue',
-            name: 'IMAGE_TAG',
-            value: 'registry.newroztech.com:' + imageTag
-        ]]
+        stage ('Login to Newroz Private Repository') {
+            withEnv(["DOCKER_USER=${DOCKER_USER}",
+                     "DOCKER_PASSWORD=${DOCKER_PASSWORD}"]) {
+                sh "make login "
+                
+            }
+        }
+        
+        stage ('Run unit/integration tests'){
+            sh 'make test'    
+        }
+        
+        
+        stage ('Building Project') {
+            sh 'make build'
+        }
+        
+        
+        stage ('Project Release') {
+            sh 'make release'
+        }
+        stage ('Tag and Publish release image') {
+            sh 'make tag latest \$(git rev-parse --short HEAD) \$(git tag --points-at HEAD)'
+            sh 'make buildtag master \$(git tag --points-at HEAD)'
+            sh "make publish"
+            sh "curl -X POST -H 'Content-Type: application/json' -d '{\"chat_id\": \"-1001556850823\", \"text\": \"App Released to Newroz Docker repo\", \"disable_notification\": true}' https://api.telegram.org/bot1750146504:AAE5lT-GQNVtEF48xQwH3IvecZa8WrytYY8/sendMessage"
+        }
     }
+    
     finally {
-        stage 'Collect test reports'
-        step([$class: 'JUnitResultArchiver', testResults: '**/reports/*.xml'])
-
-        stage 'Clean up'
-        sh 'make clean'
-        sh 'make logout'
+        stage ('collect test reports') {
+            stage "cleanup"
+            sh 'make clean'
+            sh 'make logout'
+        }
+        sh "curl -X POST -H 'Content-Type: application/json' -d '{\"chat_id\": \"-1001556850823\", \"text\": \"Deployed App\", \"disable_notification\": true}' https://api.telegram.org/bot1750146504:AAE5lT-GQNVtEF48xQwH3IvecZa8WrytYY8/sendMessage"
     }
+    
 }

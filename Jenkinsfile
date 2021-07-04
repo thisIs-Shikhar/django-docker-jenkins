@@ -36,7 +36,7 @@ node {
         stage ('collect test reports') {
             junit '**/reports/*.xml'
         }
-        stage ("cleanup"){
+        stage ("cleanup and logout"){
             sh 'make clean'
             sh 'make logout'
         }
